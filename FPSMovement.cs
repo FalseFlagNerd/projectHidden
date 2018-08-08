@@ -17,6 +17,7 @@ public class FPSMovement : MonoBehaviour {
 
     private Vector3 velocity = Vector3.zero;
     private Vector3 rotation = Vector3.zero;
+    private Vector3 crouch = Vector3.zero;
 
     [SerializeField]
     private float cameraRotationLimit = 85;
@@ -103,6 +104,20 @@ public class FPSMovement : MonoBehaviour {
         PerformJump();
     }
 
+    /*-------------------------- Crouch(Vector3 crouch) -------------------
+   |  Function Crouch
+   |
+   |  Purpose:  Set the crouch vector to apply the simulated crouch
+   |
+   |  Parameters: Vector3 crouch
+   |	      
+   |  Returns:  Nothing
+   *-------------------------------------------------------------------*/
+    public void Crouch(Vector3 crouch)
+    {
+        this.crouch = crouch;
+        PerformCrouch();
+    }
 
     /*-------------------------- FixedUpdate() -------------------
    |  Function FixedUpdate
@@ -181,4 +196,17 @@ public class FPSMovement : MonoBehaviour {
         rigidBody.AddForce(jump * jumpForce, ForceMode.Impulse);
     }
 
+   /*-------------------------- PerformCrouch() -------------------
+   |  Function PerformCrouch
+   |
+   |   Purpose:  Make the player/cam move down/up to simulate a crouch
+   | 
+   |   Parameters: None
+   |	      
+   |  Returns:  Nothing
+   *-------------------------------------------------------------------*/
+    private void PerformCrouch()
+    {
+        cam.transform.localPosition = crouch;
+    }
 }
