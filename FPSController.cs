@@ -24,7 +24,10 @@ public class FPSController : MonoBehaviour {
     private float crouchSpeed = 2.5f;
 
     [SerializeField]
-    private float jumpForce = 2.0f; 
+    private float jumpForce = 2.0f;
+
+    [SerializeField]
+    private float pounceForce = 2.0f;
 
     [SerializeField]
     private float lookSensitivity = 5f;
@@ -32,20 +35,18 @@ public class FPSController : MonoBehaviour {
     [SerializeField]
     private float crouchHeight = .25f;
 
-    private bool isGrounded;
-    private bool isCrouched;
-    private bool isSprinting;
     private Vector3 velocity;
 
     private FPSMovement movement;
+    private PlayerAttributes attributes;
 
     #endregion
 
     // Use this for initialization
     void Start ()
     {
-        movement = GetComponent<FPSMovement>();	
-        
+        movement = GetComponent<FPSMovement>();
+        attributes = GetComponent<PlayerAttributes>();
 	}
 
     /*-------------------------- OnCollisionStay() -------------------
@@ -59,7 +60,7 @@ public class FPSController : MonoBehaviour {
   *-------------------------------------------------------------------*/
     void OnCollisionStay()
     {
-        isGrounded = true;
+        attributes.Grounded = true;
     }
 
     /*-------------------------- Update() -------------------
@@ -102,11 +103,12 @@ public class FPSController : MonoBehaviour {
         Vector3 movVertical = transform.forward * yMov;
 
         // Checks to see what state the character is in for movement speed
-        if (isSprinting)
+        if (attributes.Sprinting && attributes.Stamina > 0)
         {
             velocity = (movHorizontal + movVertical).normalized * sprintSpeed;
+            attributes.Action("sprint");
         }
-        else if (isCrouched)
+        else if (attributes.Crouched)
         {
             velocity = (movHorizontal + movVertical).normalized * crouchSpeed;
         }
@@ -158,30 +160,39 @@ public class FPSController : MonoBehaviour {
         if (Input.GetKeyDown(KeyCode.LeftControl))
         {
             movement.Crouch(new Vector3(0, -crouchHeight, 0));
-
-            isCrouched = true; // Crouched
+            attributes.Crouched = true; // Crouched
         }
         else if (Input.GetKeyUp(KeyCode.LeftControl))
         {
             movement.Crouch(new Vector3(0, crouchHeight, 0));
-
-            isCrouched = false; // Not crouched
+            attributes.Crouched = false;  // Not crouched
         }
 
-        if (Input.GetKeyDown(KeyCode.LeftShift))
+        if(Input.GetKeyUp(KeyCode.LeftShift) && attributes.Stamina >= 25)
         {
-            isSprinting = true; // Sprinting
-        }
-        else if (Input.GetKeyUp(KeyCode.LeftShift))
-        {
-            isSprinting = false; // Not sprinting
+            movement.Pounce(pounceForce);
+            attributes.Action("pounce");
+
+            attributes.Grounded = false; // Jumping
         }
 
-        if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
+        //if (Input.GetKeyDown(KeyCode.LeftShift))
+        //{
+        //    attributes.SetIsSprinting(true); // Sprinting
+        //    attributes.Action("sprint");
+        //}
+        //else if (Input.GetKeyUp(KeyCode.LeftShift))
+        //{
+        //    attributes.SetIsSprinting(false); // Not sprinting
+        //    attributes.Action("stop");
+        //}
+
+        if (Input.GetKeyDown(KeyCode.Space) && attributes.Grounded)
         {
             movement.Jump(jumpForce);
+            attributes.Action("jump");
 
-            isGrounded = false; // Jumping
+            attributes.Grounded = false; // Jumping
         }
     }
 }

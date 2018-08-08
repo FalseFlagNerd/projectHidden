@@ -23,7 +23,8 @@ public class FPSMovement : MonoBehaviour {
     private float cameraRotationLimit = 85;
     private float cameraRotationX = 0f;
     private float currentCameraRotationX = 0f;
-    private float jumpForce = 0f; 
+    private float jumpForce = 0f;
+    private float pounceForce = 0f;
 
     private Rigidbody rigidBody;
     public Camera cam;
@@ -44,6 +45,9 @@ public class FPSMovement : MonoBehaviour {
         rigidBody = GetComponent<Rigidbody>();
     }
 
+    void OnCollisionStay()
+    {
+    }
     /*-------------------------- Move(Vector3 velocity) -------------------
     |  Function Move
     |
@@ -102,6 +106,21 @@ public class FPSMovement : MonoBehaviour {
     {
         this.jumpForce = jumpForce;
         PerformJump();
+    }
+
+    /*-------------------------- Pounce(float pounceForce) -------------------
+   |  Function Pounce
+   |
+   |  Purpose:  Set the pounceForce float variable for player pouncing
+   |
+   |  Parameters: float pounceForce
+   |	      
+   |  Returns:  Nothing
+   *-------------------------------------------------------------------*/
+    public void Pounce(float pounceForce)
+    {
+        this.pounceForce = pounceForce;
+        PerformPounce();
     }
 
     /*-------------------------- Crouch(Vector3 crouch) -------------------
@@ -208,5 +227,23 @@ public class FPSMovement : MonoBehaviour {
     private void PerformCrouch()
     {
         cam.transform.localPosition = crouch;
+    }
+
+    /*-------------------------- PerformPounce() -------------------
+   |  Function PerformPounce
+   |
+   |  Purpose:  Performs the actual pounce movement to the player
+   |
+   |  Parameters: None
+   |	      
+   |  Returns:  Nothing
+   *-------------------------------------------------------------------*/
+    public void PerformPounce()
+    {
+        Vector3 pounce = new Vector3(0f, 2f, 0f);
+        rigidBody.AddForce(pounce * (pounceForce), ForceMode.Impulse);
+        rigidBody.AddForce(transform.forward * pounceForce, ForceMode.VelocityChange);
+
+        rigidBody.freezeRotation = true;
     }
 }
